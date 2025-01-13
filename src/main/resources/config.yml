@@ -1,0 +1,141 @@
+###################################################################
+#                                                                 #
+#                         MENU ITEM CREATION                      #
+#                                                                 #
+###################################################################
+#
+# items:                  <-- Defines the section where custom items will be configured. -->
+#   spawn:                <-- Item identifier that could be used in other parts of the code to reference the item. -->
+#   display-name: BED     <-- Sets the item material in the game -->
+#   lore:                 <-- Configures the item description -->
+#      - Return to spawn  <-- Example of lore -->
+#   slot: 1               <-- Sets the item's position in the player's inventory -->
+#
+###################################################################
+#                             OPTIONAL                            #
+###################################################################
+#
+#   data: {ID}            <-- Defines a specific material variation -->
+#   amount: 1             <-- Defines the quantity of items for the player's inventory -->
+#
+###################################################################
+
+
+
+#
+# MENU BUILD
+#
+items:
+  checkpoint:
+    material: EMERALD
+    display-name: "§aSet new checkpoint §8[§7Right-Click§8]"
+    lore:
+      - "§7Set your own checkpoint."
+    slot: 20
+
+  return-to-checkpoint:
+    material: INK_SACK
+    data: 1
+    amount: 1
+    display-name: "§cBack to checkpoint §8[§7Right-Click§8]"
+    lore:
+      - "§7Return to your previous checkpoint."
+    slot: 21
+
+  adventure:
+    material: DIAMOND
+    display-name: "§bJump Mode §8[§7Right-Click§8]"
+    lore:
+      - "§7Enable Jump Mode. You can test your"
+      - "§7parkour map with this item. especially gimmick"
+      - "§7maps."
+    slot: 22
+
+  sword:
+    material: DIAMOND_SWORD
+    display-name: "§6Setup coordinates"
+    lore:
+      - "§7Use this to setup precise coordinates."
+    slot: 23
+
+  finish:
+    material: GOLD_PLATE
+    display-name: "§6Finish Plate"
+    lore:
+      - "§7You can also set finish with normal gold"
+      - "§7pressure plate."
+    slot: 24
+
+  hide:
+    material: INK_SACK
+    data: 10
+    amount: 1
+    display-name: "§aHide player §8[§7Right-Click§8]"
+    lore:
+      - "§7Hide all players"
+    slot: 25
+
+  show:
+    material: INK_SACK
+    data: 8
+    amount: 1
+    display-name: "§7Show players §8[§7Right-Click§8]"
+    lore:
+      - "§7Show all players"
+    slot: 25
+
+#
+# JUMP MODE
+#
+JumpMode:
+  checkpoint:
+    material: EMERALD
+    display-name: "§aSet new checkpoint §8[§7Right-Click§8]"
+    lore:
+      - "§7Set your own checkpoint."
+    slot: 3
+
+  return-to-checkpoint:
+    material: INK_SACK
+    data: 1
+    amount: 1
+    display-name: "§cBack to checkpoint §8[§7Right-Click§8]"
+    lore:
+      - "§7Return to your previous checkpoint."
+    slot: 1
+
+  adventure:
+    material: DIAMOND
+    display-name: "§bJump Mode §8[§7Right-Click§8]"
+    lore:
+      - "§7Enable Jump Mode. You can test your parkour map with this item, especially gimmick maps."
+    slot: 9
+
+  sword:
+    material: DIAMOND_SWORD
+    display-name: "§6Diamond Sword"
+    lore:
+      - "§7Use to find coordinates more accurately."
+    slot: 2
+
+  hide:
+    material: INK_SACK
+    data: 10
+    amount: 1
+    display-name: "§aHide player §8[§7Right-Click§8]"
+    lore:
+      - "§7Hide all players"
+    slot: 25
+
+  show:
+    material: INK_SACK
+    data: 8
+    amount: 1
+    display-name: "§7Show players §8[§7Right-Click§8]"
+    lore:
+      - "§7Show all players"
+    slot: 25
+
+#
+# PARCTICE MODE
+#

@@ -1,0 +1,52 @@
+name: OneJump
+version: '${project.version}'
+main: org.hopef.parkour.OneJump
+authors: [hopef]
+commands:
+  parkour:
+    description: Teleports to the parkour lobby.
+    usage: "/parkour"
+    aliases: [pk, pkr]
+    permission: "onejump.parkour"
+    permission-message: "You don't have permission to use this command."
+  psetlobby:
+    description: Sets the parkour lobby.
+    usage: "/psetlobby"
+    permission: "onejump.setlobby"
+    permission-message: "You don't have permission to use this command."
+  jump:
+    description: Toggles parkour mode for the player.
+    usage: "/jump"
+    permission: "onejump.jump"
+    permission-message: "You don't have permission to use this command."
+  pbuild:
+    description: Opens the item menu for builders.
+    usage: "/pbuild"
+    permission: "onejump.build"
+    permission-message: "You don't have permission to use this command."
+  pcheckpoint:
+    description: "get a pressure plate with your coords"
+    usage: "/pcheckpoint"
+  spc:
+    description: Define um checkpoint.
+    usage: /<command>
+  setcoord:
+    description: Set Location map
+    usage: /setcoord <ID>
+  tpmap:
+    description: Teleport from golde plate with id
+    usage: /tpmap <ID>
+
+permissions:
+  onejump.parkour:
+    description: Allows using the /parkour command.
+    default: true
+  onejump.setlobby:
+    description: Allows using the /psetlobby command to set the lobby.
+    default: op
+  onejump.jump:
+    description: Allows using the /jump command to toggle parkour mode.
+    default: true
+  onejump.build:
+    description: Allows using the /pbuild command to open the builder menu.
+    default: true
