@@ -29,13 +29,22 @@ commands:
     usage: "/pcheckpoint"
   spc:
     description: Define um checkpoint.
-    usage: /<command>
+    usage: "/<command>"
   setcoord:
     description: Set Location map
-    usage: /setcoord <ID>
+    usage: "/setcoord <ID>"
   tpmap:
     description: Teleport from golde plate with id
-    usage: /tpmap <ID>
+    usage: "/tpmap <ID>"
+  spectator:
+    description: Enable and disable spectator mode.
+    usage: "/spectator"
+    aliases: [spec, spect]
+  practice:
+    description: Enable and disable parkour practice mode.
+    usage: "/practice"
+    aliases: [prac, pract]
+
 
 permissions:
   onejump.parkour:

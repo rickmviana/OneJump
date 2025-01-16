@@ -4,7 +4,7 @@
   <groupId>org.hopef</groupId>
   <artifactId>parkour</artifactId>
   <name>OneJump</name>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <build>
     <resources>
       <resource>

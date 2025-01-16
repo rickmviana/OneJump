@@ -1,5 +1,8 @@
 package org.hopef.parkour.utils;
 
 public enum PlayerMode {
-    SPECTATOR, PRACTICE
+    SPECTATOR_ENABLE, SPECTATOR_DISABLE,
+    PRACTICE_ENABLE, PRACTICE_DISABLE,
+    JUMP_MODE_ENABLE, JUMP_MODE_DISABLE,
+    NORMAL_MODE
 }

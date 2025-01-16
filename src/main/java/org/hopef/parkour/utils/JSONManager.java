@@ -9,7 +9,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class JSONManager {
+public abstract class JSONManager {
 
     private static final File file = new File("plugins/OneJump/data.json");
 
@@ -18,11 +18,8 @@ public class JSONManager {
         try {
             JSONObject data = file.exists() ? loadData() : new JSONObject();
 
-            JSONObject locData = new JSONObject();
-            locData.put("world", loc.getWorld().getName());
-            locData.put("x", loc.getX());
-            locData.put("y", loc.getY());
-            locData.put("z", loc.getZ());
+
+            JSONObject locData = getPosition(loc);
 
             data.put(id, locData);
 
@@ -32,6 +29,20 @@ public class JSONManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static JSONObject getPosition(Location loc) {
+        JSONObject locData = new JSONObject();
+        if (loc.getWorld() != null) {
+            locData.put("world", loc.getWorld().getName());
+            locData.put("x", loc.getX());
+            locData.put("y", loc.getY());
+            locData.put("z", loc.getZ());
+            locData.put("yaw", loc.getYaw());
+            locData.put("pitch", loc.getPitch());
+        }
+
+        return locData;
     }
 
     // Obter localização pelo ID

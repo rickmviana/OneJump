@@ -1,5 +1,6 @@
 package org.hopef.parkour.command;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -8,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.hopef.parkour.utils.Constantes;
+import org.hopef.parkour.utils.JSONManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +32,8 @@ public class SetCoordCommand implements CommandExecutor {
         }
 
         String id = args[0];
-        playerIds.put(player, id); // Associa o ID ao jogador
+        Location playerLocation = player.getLocation(); // Obtém a localização atual do jogador
+        JSONManager.saveLocation(playerLocation, id); // Salva a localização no JSON com o ID fornecido
 
         ItemStack pressure = new ItemStack(Material.GOLD_PLATE);
         ItemMeta meta = pressure.getItemMeta();
@@ -38,9 +41,10 @@ public class SetCoordCommand implements CommandExecutor {
         pressure.setItemMeta(meta);
 
         player.getInventory().addItem(pressure);
-        player.sendMessage("§aPressure plate created with ID: §e" + id);
+        player.sendMessage("§aLocation saved and pressure plate created with ID: §e" + id);
         return true;
     }
+
 
     public static String getPlayerId(Player player) {
         return playerIds.get(player);

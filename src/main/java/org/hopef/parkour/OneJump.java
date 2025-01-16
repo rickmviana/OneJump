@@ -7,7 +7,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -20,6 +19,8 @@ import org.hopef.parkour.command.*;
 import org.hopef.parkour.events.*;
 import org.hopef.parkour.manager.*;
 import org.hopef.parkour.manager.checkpoints.CheckpointManager;
+import org.hopef.parkour.types.GUIManager;
+import org.hopef.parkour.types.Menu;
 import org.hopef.parkour.utils.Constantes;
 import org.hopef.parkour.utils.JSONManager;
 import org.hopef.parkour.utils.WorldChecker;
@@ -34,16 +35,17 @@ import java.util.*;
 /**
  * @author hopef
  */
-public final class OneJump extends JavaPlugin implements Listener {
+public class OneJump extends JavaPlugin implements Listener {
 
-    private final Map<Location, Location> pressurePlateCheckpoints = new HashMap<>();
-    private final Map<UUID, Location> playerTemporaryCheckpoint = new HashMap<>();
+    public static final Map<Location, Location> pressurePlateCheckpoints = new HashMap<>();
+    public static final Map<UUID, Location> playerTemporaryCheckpoint = new HashMap<>();
     private final Set<Player> playersOnPlate = new HashSet<>();
     private File checkpointFile;
 
     private CheckpointManager checkpointManager;
     private LobbyManager lobbyManager;
     private WorldChecker worldChecker;
+    private Menu menu;
     private Player player;
 
     @Override
@@ -83,6 +85,7 @@ public final class OneJump extends JavaPlugin implements Listener {
         lobbyManager = new LobbyManager(getDataFolder());
         checkpointManager = new CheckpointManager();
         worldChecker = new WorldChecker(getDataFolder());
+        menu = new Menu(new ItemManager(getConfig()));
 
         registerCommands();
         registerEvents();
@@ -98,16 +101,11 @@ public final class OneJump extends JavaPlugin implements Listener {
     @EventHandler
     public void onPressurePlateClick(PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-
         if (event.getClickedBlock() == null || event.getClickedBlock().getType() != Material.IRON_PLATE) return;
-
         Player player = event.getPlayer();
         if (!worldChecker.isInAllowedWorld(player)) return;
-
         Location plateLocation = event.getClickedBlock().getLocation();
-
-        // Abre o menu de checkpoint para definir ou sobrescrever
-        openCheckpointMenu(player, plateLocation);
+        Menu.modifyMenu(player, "§8Modify Checkpoint", 27, plateLocation);
     }
 
     @EventHandler
@@ -123,14 +121,14 @@ public final class OneJump extends JavaPlugin implements Listener {
                 if (!playersOnPlate.contains(player)) {
                     // Adiciona o jogador ao conjunto e toca o som
                     playersOnPlate.add(player);
-                    player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1.0F, 2.0F);
+                    player.playSound(player.getLocation(), Sound.LEVEL_UP, 1.0F, 1.0F);
 
                     Location plateLocation = event.getClickedBlock().getLocation();
 
                     // Verifica se a pressure plate está associada a um checkpoint
                     if (pressurePlateCheckpoints.containsKey(plateLocation)) {
                         Location checkpoint = pressurePlateCheckpoints.get(plateLocation);
-                        checkpointManager.updateCheckpointForPlayer(player, checkpoint);
+                        CheckpointManager.updateCheckpointForPlayer(player, checkpoint);
                     } else {
                         player.sendMessage(Constantes.NO_ASSOCIATION.getText());
                     }
@@ -171,7 +169,7 @@ public final class OneJump extends JavaPlugin implements Listener {
 
         // Verifica se o item é "§cBack to checkpoint"
         if (item != null && item.hasItemMeta() && "§cBack to checkpoint §8[§7Right-Click§8]".equals(item.getItemMeta().getDisplayName())) {
-            Location checkpointLocation = checkpointManager.getPlayerCheckpoint(player);
+            Location checkpointLocation = CheckpointManager.getPlayerCheckpoint(player);
 
             if (checkpointLocation != null) {
                 player.teleport(checkpointLocation);
@@ -231,77 +229,6 @@ public final class OneJump extends JavaPlugin implements Listener {
             }
         }
     }
-
-    private void openCheckpointMenu(Player player, Location plateLocation) {
-        Inventory inventory = Bukkit.createInventory(null, 27, "§8Modify Checkpoint");
-
-        // Criando os itens de vidro com os diferentes tipos
-        ItemStack blackGlass = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 15); // Vidro preto
-        ItemMeta blackMeta = blackGlass.getItemMeta();
-        blackMeta.setDisplayName(" "); // Sem nome
-        blackGlass.setItemMeta(blackMeta);
-
-        ItemStack whiteGlass = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 0); // Vidro branco
-        ItemMeta whiteMeta = whiteGlass.getItemMeta();
-        whiteMeta.setDisplayName(" "); // Sem nome
-        whiteGlass.setItemMeta(whiteMeta);
-
-        ItemStack grayGlass = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7); // Vidro cinza
-        ItemMeta grayMeta = grayGlass.getItemMeta();
-        grayMeta.setDisplayName(" "); // Sem nome
-        grayGlass.setItemMeta(grayMeta);
-
-        // Preenchendo a parte de fora do inventário com os vidros corretos
-        for (int i = 0; i < 27; i++) {
-            if (i == 0 || i == 8 || i == 18 || i == 26) { // Pontas (Black Glass)
-                inventory.setItem(i, blackGlass);
-            } else if (i == 9 || i == 17) { // Meio das pontas (White Glass)
-                inventory.setItem(i, whiteGlass);
-            } else if (i >= 1 && i <= 7 || i >= 19 && i <= 25) { // Linha superior e inferior (Gray Glass)
-                inventory.setItem(i, grayGlass);
-            }
-        }
-
-        // Item central para definir checkpoint
-        ItemStack pressurePlateItem = new ItemStack(Material.IRON_PLATE);
-        ItemMeta plateMeta = pressurePlateItem.getItemMeta();
-        plateMeta.setDisplayName("§bSet designated coordinates");
-
-        // Verifica se já existe um checkpoint para essa plate e exibe as coordenadas
-        Location checkpointLocation = pressurePlateCheckpoints.get(plateLocation);
-        List<String> lore = getStrings(checkpointLocation);
-
-        plateMeta.setLore(lore);
-
-        pressurePlateItem.setItemMeta(plateMeta);
-
-        inventory.setItem(13, pressurePlateItem); // Colocando o item central
-
-        player.openInventory(inventory);
-
-        // Armazena a localização temporária da plate para o jogador
-        playerTemporaryCheckpoint.put(player.getUniqueId(), plateLocation);
-    }
-
-    private static List<String> getStrings(Location checkpointLocation) {
-        List<String> lore = new ArrayList<>();
-
-        // Adiciona a linha separadora
-        lore.add("§7--------------------");
-
-        if (checkpointLocation != null) {
-            // Adiciona as coordenadas uma embaixo da outra
-            lore.add("§7X: " + checkpointLocation.getX());
-            lore.add("§7Y: " + String.format("%.1f", checkpointLocation.getY()));
-            lore.add("§7Z: " + checkpointLocation.getZ());
-            lore.add("§7Yaw: " + String.format("%.5f", checkpointLocation.getYaw()));
-            lore.add("§7Pitch: " + String.format("%.5f", checkpointLocation.getPitch()));
-        } else {
-            lore.add("§cNo checkpoint set");
-        }
-        return lore;
-    }
-
     private void loadCheckpoints() {
         checkpointFile = new File(getDataFolder(), "checkpoints.json");
         if (!checkpointFile.exists()) {
@@ -397,24 +324,18 @@ public final class OneJump extends JavaPlugin implements Listener {
     }
 
     private JSONObject serializeLocation(Location location) {
-        JSONObject locationData = new JSONObject();
-        locationData.put("world", location.getWorld().getName()); // Nome do mundo deve ser salvo corretamente
-        locationData.put("x", location.getX());
-        locationData.put("y", location.getY());
-        locationData.put("z", location.getZ());
-        locationData.put("yaw", location.getYaw());
-        locationData.put("pitch", location.getPitch());
-        return locationData;
+        return JSONManager.getPosition(location);
     }
 
     private void registerEvents() {
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new FallDamageEvent(lobbyManager), this);
-        Bukkit.getPluginManager().registerEvents(new BuildCommand(new ItemManager(getConfig()), checkpointManager, worldChecker, player), this);
+        Bukkit.getPluginManager().registerEvents(new BuildCommand(new ItemManager(getConfig()), worldChecker, getConfig()), this);
         Bukkit.getPluginManager().registerEvents(new PlaceItemEvent(), this);
         Bukkit.getPluginManager().registerEvents(new HungerControlListener(worldChecker), this);
         Bukkit.getPluginManager().registerEvents(new PressurePlateListener(), this);
         Bukkit.getPluginManager().registerEvents(new WorldChange(worldChecker), this);
+        Bukkit.getPluginManager().registerEvents(new ItemInteractionListener(), this);
     }
 
     private void registerCommands() {
@@ -423,10 +344,12 @@ public final class OneJump extends JavaPlugin implements Listener {
 
         getCommand("parkour").setExecutor(new ParkourCommand(lobbyManager, worldChecker));
         getCommand("psetlobby").setExecutor(new LobbyCommand(lobbyManager));
-        getCommand("jump").setExecutor(new JumpCommand(itemManager, worldChecker, player));
-        getCommand("pbuild").setExecutor(new BuildCommand(itemManager, checkpointManager, worldChecker, player));
+        getCommand("jump").setExecutor(new JumpCommand(itemManager, worldChecker));
+        getCommand("pbuild").setExecutor(new BuildCommand(itemManager, worldChecker, getConfig()));
         getCommand("setcoord").setExecutor(new SetCoordCommand());
         getCommand("tpmap").setExecutor(new TpMapCommand(worldChecker));
+        getCommand("spectator").setExecutor(new SpectatorCommand(itemManager, worldChecker));
+        getCommand("practice").setExecutor(new PracticeCommand(itemManager, worldChecker));
     }
 
     @EventHandler

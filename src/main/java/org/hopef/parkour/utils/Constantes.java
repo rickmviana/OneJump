@@ -27,7 +27,22 @@ public enum Constantes {
     SHOW_MESSAGE("§r§8[§r§2§l!§r§8] §r§aShowed §r§7all players.§r"),
     JUMP_MODE("§bJump Mode §8[§7Right-Click§8]"),
     JUMP_MODE_DISABLE("§r§8[§r§6§l!§r§8] §r§7Disabled §r§eJump Mode§r§7.§r"),
-    JUMP_MODE_ENABLE("§r§8[§r§6§l!§r§8] §r§7Enabled §r§eJump Mode§r§7.§r");
+    JUMP_MODE_ENABLE("§r§8[§r§6§l!§r§8] §r§7Enabled §r§eJump Mode§r§7.§r"),
+    FLY_ITEM_ENABLE("§aEnable Fly §8[§7Right-Click§8]"),
+    FLY_ITEM_DISABLE("§7Disable Fly §8[§7Right-Click§8]"),
+    FLY_MESSAGE_ENABLE("§r§8[§r§2§l!§r§8] §r§aEnabled fly§r§7.§r"),
+    FLY_MESSAGE_DISABLE("§r§8[§r§7§l!§r§8] §r§7Disabled fly.§r"),
+    FLY_ITEM_LORE_ENABLE("§7Enable fly with this item"),
+    FLY_ITEM_LORE_DISABLE("§7Disable fly with this item"),
+    SPECTATOR_MESSAGE_ENABLE("§r§8[§r§2§l!§r§8] §r§7Enabled §r§aSpectate Mode§r§7.§r"),
+    SPECTATOR_MESSAGE_DISABLE("§r§8[§r§2§l!§r§8] §r§7Disabled §r§aSpectate Mode§r§7.§r"),
+    SPECTATOR_ITEM_ENABLE("§aSpectate Mode §8[§7Right-Click§8]"),
+    SPECTATOR_ITEM_DISABLE("§cDisable Spectate Mode §8[§7Right-Click§8]"),
+    PRACTICE_MESSAGE_ENABLE("§r§8[§r§3§l!§r§8] §r§7Enabled §r§bPractice Mode§r§7.§r"),
+    PRACTICE_MESSAGE_DISABLE("§r§8[§r§3§l!§r§8] §r§7Disabled §r§bPractice Mode.§r"),
+    PRACTICE_ITEM_ENABLE("§bPractice Mode §8[§7Right-Click§8]"),
+    PRACTICE_ITEM_DISABLE("§cDisable practice mode §8[§7Right-Click§8]"),
+    PRACTICE_ITEM_CHECKPOINT("§eReturn to Checkpoint §8[§7Right-Click§8]");
 
     private final String TEXT;
 

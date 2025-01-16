@@ -20,12 +20,15 @@
 #
 ###################################################################
 
-
-
 #
 # MENU BUILD
 #
 items:
+  info:
+    material: IRON_PICKAXE
+    display-name: "§bBuild Menu"
+    slot: 4
+
   checkpoint:
     material: EMERALD
     display-name: "§aSet new checkpoint §8[§7Right-Click§8]"
@@ -72,7 +75,7 @@ items:
     amount: 1
     display-name: "§aHide player §8[§7Right-Click§8]"
     lore:
-      - "§7Hide all players"
+      - "§7Hide all players."
     slot: 25
 
   show:
@@ -81,11 +84,74 @@ items:
     amount: 1
     display-name: "§7Show players §8[§7Right-Click§8]"
     lore:
-      - "§7Show all players"
+      - "§7Show all players."
     slot: 25
 
+  fly:
+    material: FEATHER
+    display-name: "§aEnable Fly §8[§7Right-Click§8]"
+    lore:
+      - "§7Enable fly with this item."
+    slot: 29
+
+  fly-disable:
+    material: FEATHER
+    display-name: "§7Disable Fly §8[§7Right-Click§8]"
+    lore:
+      - "§7Disable fly with this item."
+
+  select-map:
+    material: NETHER_STAR
+    display-name: "§dMain Menu"
+    lore:
+      - "§7Use this item to select the map you want to go and practice."
+    slot: 30
+
+  teleport-player:
+    material: NETHER_STAR
+    display-name: "§bTeleport to players §8[§7Right-Click§8]"
+    lore:
+      - "Teleport to other players!"
+    slot: 31
+
+  spectate-enable:
+    material: EYE_OF_ENDER
+    display-name: "§aSpectate Mode §8[§7Right-Click§8]"
+    lore:
+      - "§7Enable spectate mode with this item."
+    slot: 32
+
+  spectate-disable:
+    material: ENDER_PEARL
+    display-name: "§cDisable Spectate Mode §8[§7Right-Click§8]"
+    lore:
+      - "§7Disable spectate mode with this item."
+    slot: 33
+
+  disable-practice:
+    material: MAGMA_CREAM
+    display-name: "§cDisable practice mode §8[§7Right-Click§8]"
+    lore:
+      - "§7Disable practice mode with this item. You can also"
+      - "§7disable practice mode with /unprac command!"
+    slot: 34
+
+  practice-mode:
+    material: GOLD_INGOT
+    display-name: "§bPractice Mode §8[§7Right-Click§8]"
+    lore:
+      - "§7Enable practice mode with this item."
+    slot: 35
+
+  prac-checkpoint:
+    material: SLIME_BALL
+    display-name: "§eReturn to Checkpoint §8[§7Right-Click§8]"
+    lore:
+      - "§7Return to your previous checkpoint."
+    slot: 36
+
 #
-# JUMP MODE
+# JUMP MODE INVENTORY
 #
 JumpMode:
   checkpoint:
@@ -95,14 +161,12 @@ JumpMode:
       - "§7Set your own checkpoint."
     slot: 3
 
-  return-to-checkpoint:
-    material: INK_SACK
-    data: 1
-    amount: 1
-    display-name: "§cBack to checkpoint §8[§7Right-Click§8]"
+  prac-checkpoint:
+    material: SLIME_BALL
+    display-name: "§eReturn to Checkpoint §8[§7Right-Click§8]"
     lore:
       - "§7Return to your previous checkpoint."
-    slot: 1
+    slot: 36
 
   adventure:
     material: DIAMOND
@@ -124,7 +188,7 @@ JumpMode:
     amount: 1
     display-name: "§aHide player §8[§7Right-Click§8]"
     lore:
-      - "§7Hide all players"
+      - "§7Hide all players."
     slot: 25
 
   show:
@@ -133,9 +197,107 @@ JumpMode:
     amount: 1
     display-name: "§7Show players §8[§7Right-Click§8]"
     lore:
-      - "§7Show all players"
+      - "§7Show all players."
     slot: 25
 
 #
-# PARCTICE MODE
+# SPECTATOR MODE INVENTORY
 #
+spectator:
+  checkpoint:
+    material: EMERALD
+    display-name: "§aSet new checkpoint §8[§7Right-Click§8]"
+    lore:
+      - "§7Set your own checkpoint."
+    slot: 2
+
+  prac-checkpoint:
+    material: SLIME_BALL
+    display-name: "§eReturn to Checkpoint §8[§7Right-Click§8]"
+    lore:
+      - "§7Return to your previous checkpoint."
+    slot: 36
+
+  sword:
+    material: DIAMOND_SWORD
+    display-name: "§6Diamond Sword"
+    lore:
+      - "§7Use to find coordinates more accurately."
+    slot: 1
+
+  fly:
+    material: FEATHER
+    display-name: "§aEnable Fly §8[§7Right-Click§8]"
+    lore:
+      - "§7Enable fly with this item."
+    slot: 7
+
+  teleport-player:
+    material: NETHER_STAR
+    display-name: "§bTeleport to players §8[§7Right-Click§8]"
+    lore:
+      - "Teleport to other players!"
+    slot: 4
+
+  spectate-disable:
+    material: ENDER_PEARL
+    display-name: "§cDisable Spectate Mode §8[§7Right-Click§8]"
+    lore:
+      - "§7Disable spectate mode with this item."
+    slot: 6
+
+  practice-mode:
+    material: GOLD_INGOT
+    display-name: "§bPractice Mode §8[§7Right-Click§8]"
+    lore:
+      - "§7Enable practice mode with this item."
+    slot: 8
+
+#
+# PRACTICE MODE INVENTORY
+#
+practice:
+  checkpoint:
+    material: EMERALD
+    display-name: "§aSet new checkpoint §8[§7Right-Click§8]"
+    lore:
+      - "§7Set your own checkpoint."
+    slot: 2
+
+  prac_checkpoint:
+    material: SLIME_BALL
+    display-name: "§eReturn to Checkpoint §8[§7Right-Click§8]"
+    lore:
+      - "§7Return to your previous checkpoint."
+    slot: 36
+
+  sword:
+    material: DIAMOND_SWORD
+    display-name: "§6Diamond Sword"
+    lore:
+      - "§7Use to find coordinates more accurately."
+    slot: 1
+
+  spectate-enable:
+    material: EYE_OF_ENDER
+    display-name: "§aSpectate Mode §8[§7Right-Click§8]"
+    lore:
+      - "§7Enable spectate mode with this item."
+    slot: 32
+
+  disable-practice:
+    material: MAGMA_CREAM
+    display-name: "§cDisable practice mode §8[§7Right-Click§8]"
+    lore:
+      - "§7Disable practice mode with this item. You can also"
+      - "§7disable practice mode with /unprac command!"
+    slot: 8
+
+  hide:
+    material: INK_SACK
+    data: 10
+    amount: 1
+    display-name: "§aHide player §8[§7Right-Click§8]"
+    lore:
+      - "§7Hide all players."
+    slot: 7

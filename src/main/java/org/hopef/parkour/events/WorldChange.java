@@ -17,14 +17,27 @@ public class WorldChange implements Listener {
         this.checker = checker;
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onWorldCharge(PlayerChangedWorldEvent event) {
         Player player = event.getPlayer();
 
         if (!checker.isInAllowedWorld(player)) return;
 
-        InventoryFactory.clearInventory(player);
+        if (!player.getAllowFlight()){
+            player.setAllowFlight(true);
+            player.setFlying(true);
+        }
+
+        switch (player.getGameMode()) {
+            case SURVIVAL:
+            case ADVENTURE:
+                player.setGameMode(GameMode.CREATIVE);
+                break;
+            default:
+                player.setGameMode(GameMode.ADVENTURE);
+                break;
+        }
         InventoryFactory.clearSavedInventory(player);
-        player.setGameMode(GameMode.CREATIVE);
+        InventoryFactory.clearInventory(player);
     }
 }
