@@ -3,19 +3,21 @@ package org.hopef.parkour.events;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.material.PistonBaseMaterial;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Handles player interactions with specific blocks such as pistons, cakes, and iron trapdoors.
  */
 public class ItemInteractionListener implements Listener {
 
-    private int pistonClickCount = 0; // Contador de cliques para alternar os estados do pistão
+    // Map to store the state of pistons
+    private final Map<Block, Integer> pistonStates = new HashMap<>();
 
     /**
      * Handles player right-click interactions with blocks.
@@ -38,8 +40,12 @@ public class ItemInteractionListener implements Listener {
                     consumeCakeSlice(clickedBlock, event.getPlayer().getGameMode());
                 }
                 // Handles Piston interactions
-                else if (blockType == Material.PISTON_BASE || blockType == Material.PISTON_EXTENSION) {
-                    togglePistonState(clickedBlock, event);
+                else if (blockType == Material.PISTON_BASE || blockType == Material.PISTON_EXTENSION || blockType == Material.PISTON_STICKY_BASE) {
+                    togglePistonState(clickedBlock);
+                }
+                // Handles Iron Door interactions
+                else if (blockType == Material.IRON_DOOR) {
+                    toggleIronDoor(clickedBlock);
                 }
             }
         }
@@ -54,6 +60,29 @@ public class ItemInteractionListener implements Listener {
         byte data = block.getData();
         block.setData((byte) (data ^ 0x04)); // Toggle the open state using XOR
     }
+
+    /**
+     * Toggles the state of an Iron Door between open and closed.
+     *
+     * @param block The {@link Block} representing the Iron Door.
+     */
+    private void toggleIronDoor(Block block) {
+        // Verifica se o bloco está sendo alimentado por um sinal de redstone
+        boolean isPowered = block.isBlockPowered(); // Verifica se o bloco está alimentado
+
+        // Configura a porta com base no estado de alimentação
+        if (isPowered) {
+            // A porta de ferro está fechada quando não há sinal de redstone
+            block.setData((byte) 0); // Fecha a porta
+        } else {
+            // A porta de ferro está aberta quando há sinal de redstone
+            block.setData((byte) 8); // Abre a porta
+        }
+
+        // Força a atualização do estado visual do bloco
+        block.getState().update(true, true);
+    }
+
 
     /**
      * Consumes a slice of a Cake block and resets it to full when completely consumed.
@@ -85,49 +114,35 @@ public class ItemInteractionListener implements Listener {
      *
      * @param block The {@link Block} representing the Piston.
      */
-    private void togglePistonState(Block block, PlayerInteractEvent event) {
-        BlockState state = block.getState();
-        Material blockType = block.getType();
+    private void togglePistonState(Block block) {
+        // Obtém o estado atual do pistão
+        int currentState = pistonStates.getOrDefault(block, 0);
+        int nextState = (currentState + 1) % 3; // Próximo estado (0 -> 1 -> 2 -> 0)
+        pistonStates.put(block, nextState);
 
-        if (state.getData() instanceof PistonBaseMaterial) {
-            PistonBaseMaterial piston = (PistonBaseMaterial) state.getData();
+        // Pega a orientação atual do pistão
+        byte orientation = block.getData(); // Armazena a orientação do pistão
 
-            // Alterna os estados com base no contador de cliques
-            pistonClickCount++;
-            switch (pistonClickCount % 4) { // Divide os 3 estados usando o operador modulo
-                case 0:
-                    // Restaura o pistão completo
-                    piston.setPowered(true); // Restaura a energia
-                    break;
-                case 1:
-                    // Remove a cabeça do pistão
-                    block.setType(Material.PISTON_EXTENSION);
-                    piston.setPowered(true); // Desliga o pistão
-                    break;
-                case 2:
-                    // Remove o corpo do pistão e coloca a cabeça
-                    block.setType(Material.PISTON_BASE);
-                    piston.setPowered(false);
-                    break;
-            }
+        // Define o estado do bloco baseado no estado
+        switch (nextState) {
+            case 0: // Posição inicial (pistão completo)
+                block.setType(Material.PISTON_BASE);
+                block.setData((byte) (orientation & 0x7));
+                //block.setData(orientation); // Mantém a orientação original
+                break;
 
-            // Atualiza o estado do bloco
-            state.setData(piston);
-            state.update();
+            case 1: // Apenas corpo do pistão
+                block.setType(Material.PISTON_BASE);
+                block.setData((byte) (orientation | 0x8)); // Define como "powered"
+                break;
+
+            case 2: // Apenas cabeça (remover pistão)
+                block.setType(Material.PISTON_EXTENSION);
+                block.setData(orientation); // Mantém a orientação da cabeça
+                break;
         }
-    }
 
-    /**
-     * Verifica se o pistão está energizado
-     *
-     * @param block O bloco que representa o pistão.
-     * @return true se o pistão estiver energizado, false caso contrário.
-     */
-    private boolean isPistonPowered(Block block) {
-        if (block.getState().getData() instanceof PistonBaseMaterial) {
-            PistonBaseMaterial piston = (PistonBaseMaterial) block.getState().getData();
-            return piston.isPowered();
-        }
-        return false;
+        // Força a atualização do estado no mundo
+        block.getState().update(true, true);
     }
 }

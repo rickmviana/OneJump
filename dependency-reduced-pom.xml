@@ -4,7 +4,7 @@
   <groupId>org.hopef</groupId>
   <artifactId>parkour</artifactId>
   <name>OneJump</name>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <build>
     <resources>
       <resource>
@@ -50,6 +50,18 @@
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
       <version>1.8.8-R0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.spigotmc</groupId>
+      <artifactId>spigot</artifactId>
+      <version>1.8.8-R0.1-SNAPSHOT</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.luckperms</groupId>
+      <artifactId>api</artifactId>
+      <version>5.4</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

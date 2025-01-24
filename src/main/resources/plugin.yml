@@ -1,6 +1,8 @@
 name: OneJump
 version: '${project.version}'
 main: org.hopef.parkour.OneJump
+depend:
+  - scoreboards
 authors: [hopef]
 commands:
   parkour:
@@ -44,6 +46,15 @@ commands:
     description: Enable and disable parkour practice mode.
     usage: "/practice"
     aliases: [prac, pract]
+  setmap:
+    description: Salva a localização de um mapa.
+    usage: /setmap <nome>
+  removemap:
+    description: Remove um mapa salvo.
+    usage: /removemap <nome>
+  sb:
+    description: "Sets the block you are holding to the position you are in."
+    usage: "/sb"
 
 
 permissions:

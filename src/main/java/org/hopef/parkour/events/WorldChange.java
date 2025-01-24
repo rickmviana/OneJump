@@ -6,14 +6,18 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.hopef.parkour.manager.InventoryFactory;
+import org.hopef.parkour.utils.Scoreboard;
 import org.hopef.parkour.utils.WorldChecker;
 
 public class WorldChange implements Listener {
 
+    private final JavaPlugin plugin;
     WorldChecker checker;
 
-    public WorldChange(WorldChecker checker) {
+    public WorldChange(JavaPlugin plugin, WorldChecker checker) {
+        this.plugin = plugin;
         this.checker = checker;
     }
 
@@ -39,5 +43,6 @@ public class WorldChange implements Listener {
         }
         InventoryFactory.clearSavedInventory(player);
         InventoryFactory.clearInventory(player);
+        Scoreboard.setupScoreboard(player);
     }
 }

@@ -1,0 +1,14 @@
+scoreboard:
+  title: "§b§lMPK§7-§f§lParkour"
+  lines:
+    - ""
+    - "§3User: §f{player_name}"
+    - ""
+    - "§fCargo: §7{role}"
+    - "§fNível: §7(Em breve)"
+    - ""
+    - "§6Parkour Score: §e{parkour_score}"
+    - "§2Jump Count: §a{jump_count}"
+    - ""
+    - "Jogadores: §a{server_players}"
+    - ""

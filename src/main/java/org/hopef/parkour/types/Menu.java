@@ -25,7 +25,6 @@ public final class Menu extends GUIManager {
     private static final Map<Integer, Short> CUSTOM_GLASS_BUILD = new HashMap<>();
     private static final Map<Integer, Short> CUSTOM_GLASS_SET_CHECKPOINT = new HashMap<>();
     private static final Map<Integer, Short> CUSTOM_GLASS_SELECT_MAP = new HashMap<>();
-    //private static final Map<Integer, Short> CUSTOM_GLASS_SET_CHECKPOINT = new HashMap<>();
 
     private static final Map<Integer, ItemStack> CUSTOM_ITEM_BUILD = new HashMap<>();
     private static final Map<Integer, ItemStack> CUSTOM_ITEM_SELECT_MAP = new HashMap<>();
@@ -121,6 +120,21 @@ public final class Menu extends GUIManager {
     public static void selectMenu(Player player, String title, int size) {
         Map<int[], GlassPaneType> slotConfigurations = new HashMap<>();
 
-        slotConfigurations.put(new int[]{0, 8, 18, 26}, BLACK);
+        slotConfigurations.put(new int[]{0, 8, 36, 44}, WHITE);
+        slotConfigurations.put(new int[]{1, 2, 6, 7, 9, 17, 27, 35, 37, 38, 42, 43}, GREEN); // 1 2 6 7 9 16 25 35 37 38 42 43
+        slotConfigurations.put(new int[]{3, 5, 18, 26, 39, 40, 41}, LIME); // 3 5 17 24 39 40 41
+
+        for (Map.Entry<int[], GlassPaneType> entry : slotConfigurations.entrySet()) {
+            int[] slots = entry.getKey();
+            GlassPaneType glassType = entry.getValue();
+
+            for (int slot : slots) {
+                CUSTOM_GLASS_SELECT_MAP.put(slot, glassType.getId());
+            }
+        }
+
+        CUSTOM_ITEM_SELECT_MAP.put(4, itemManager.getItem("map-info"));
+
+        GUIManager.selectMapMenu(player, title, size, null, CUSTOM_ITEM_SELECT_MAP, CUSTOM_GLASS_SELECT_MAP);
     }
 }

@@ -88,7 +88,6 @@ public class BuildCommand extends ItemFactory implements CommandExecutor, Listen
 
             GameModes.togglePlayerMode(player, displayName, itemManager, event);
             ItemFactory.handleItemClick(player, displayName, item);
-            event.setCancelled(true);
             player.updateInventory();
 
         }

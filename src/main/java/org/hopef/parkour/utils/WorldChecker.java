@@ -1,7 +1,5 @@
 package org.hopef.parkour.utils;
 
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
@@ -35,7 +33,6 @@ public class WorldChecker {
 
         YamlConfiguration spawnConfig = YamlConfiguration.loadConfiguration(spawnFile);
         String worldName = spawnConfig.getString("lobby.world", "world"); // "world" é o valor padrão
-        System.out.println("Mundo permitido carregado do spawn.yml: " + worldName); // Log de depuração
         return worldName;
     }
 }

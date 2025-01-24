@@ -26,7 +26,12 @@
 items:
   info:
     material: IRON_PICKAXE
-    display-name: "§bBuild Menu"
+    display-name: "§l§bBuild Menu"
+    slot: 4
+
+  map-info:
+    material: NETHER_STAR
+    display-name: "§l§eSelect Map"
     slot: 4
 
   checkpoint:
@@ -101,8 +106,8 @@ items:
       - "§7Disable fly with this item."
 
   select-map:
-    material: NETHER_STAR
-    display-name: "§dMain Menu"
+    material: COMPASS
+    display-name: "§dMain Menu §8[§7Right-Click§8]"
     lore:
       - "§7Use this item to select the map you want to go and practice."
     slot: 30

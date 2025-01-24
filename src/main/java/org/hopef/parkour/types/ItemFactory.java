@@ -56,6 +56,7 @@ public abstract class ItemFactory extends ItemManager {
             case "§cBack to checkpoint §8[§7Right-Click§8]":
             case "§aHide player §8[§7Right-Click§8]":
             case "§aEnable Fly §8[§7Right-Click§8]":
+            case "§dMain Menu §8[§7Right-Click§8]":
             case "§bJump Mode §8[§7Right-Click§8]":
             case "§6Setup coordinates":
             case "§6Finish Plate":
@@ -82,8 +83,13 @@ public abstract class ItemFactory extends ItemManager {
         switch (displayName){
 
             case "§aSet new checkpoint §8[§7Right-Click§8]":
-                CheckpointManager.setPlayerCheckpoint(player, player.getLocation());
-                CheckpointManager.setPracticeCheckpoint(player, player.getLocation());
+                PlayerMode mode = GameModes.getPlayerMode(player);
+                if (mode == PlayerMode.JUMP_MODE_ENABLE) {
+                    CheckpointManager.setPlayerCheckpoint(player, player.getLocation());
+                }
+                if (mode == PlayerMode.SPECTATOR_ENABLE  || mode == PlayerMode.PRACTICE_ENABLE) {
+                    CheckpointManager.setPracticeCheckpoint(player, player.getLocation());
+                }
                 player.playSound(player.getLocation(), Sound.LEVEL_UP, 1.0F, 1.0F);
                 player.sendMessage(Constantes.NEW_CHECKPOINT.getText());
                 break;
@@ -153,6 +159,9 @@ public abstract class ItemFactory extends ItemManager {
                 }
                 break;
 
+            case "§dMain Menu §8[§7Right-Click§8]":
+                Menu.selectMenu(player, "§8Maps Menu", 45);
+
             default:
                 break;
         }
@@ -172,5 +181,4 @@ public abstract class ItemFactory extends ItemManager {
         meta.addEnchant(Enchantment.DURABILITY, 1, true);
         item.setItemMeta(meta);
     }
-
 }

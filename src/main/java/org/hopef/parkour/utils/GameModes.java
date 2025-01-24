@@ -1,3 +1,20 @@
+/*
+ *     Copyright (C) 2025 rickmviana
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.hopef.parkour.utils;
 
 import org.bukkit.GameMode;
@@ -10,6 +27,7 @@ import org.hopef.parkour.manager.checkpoints.CheckpointManager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * The GameModes class provides utility methods for managing game modes
@@ -20,6 +38,7 @@ public abstract class GameModes {
 
     // Mapeamento de jogadores para seus modos de jogo
     private static final Map<Player, PlayerMode> playerModes = new HashMap<>();
+    private static final Map<UUID, Boolean> playersInJumpMode = new HashMap<>();
 
     /**
      * Sets the player's game mode.
@@ -50,6 +69,18 @@ public abstract class GameModes {
         playerModes.remove(player);
     }
 
+    public static boolean hasEnteredJumpMode(Player player) {
+        return playersInJumpMode.getOrDefault(player.getUniqueId(), false);
+    }
+
+    public static void removePlayersInJumpMode(Player player) {
+        playersInJumpMode.remove(player.getUniqueId());
+    }
+
+    private static void markPlayerInJumpMode(Player player) {
+        playersInJumpMode.put(player.getUniqueId(), true);
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /*
@@ -75,7 +106,6 @@ public abstract class GameModes {
                 setPlayerMode(player, PlayerMode.JUMP_MODE_ENABLE);
             }
             setGameMode(player, itemManager);
-            event.setCancelled(true);
             return;
         }
 
@@ -84,16 +114,17 @@ public abstract class GameModes {
                 setPlayerMode(player, PlayerMode.SPECTATOR_ENABLE);
             }
             setGameMode(player, itemManager);
-            event.setCancelled(true);
             return;
         }
 
         if (displayName.equals(Constantes.SPECTATOR_ITEM_DISABLE.getText())) {
             if (currentMode == PlayerMode.SPECTATOR_ENABLE) {
                 setPlayerMode(player, PlayerMode.SPECTATOR_DISABLE);
+                if (hasEnteredJumpMode(player)) {
+                    setPlayerMode(player, PlayerMode.JUMP_MODE_ENABLE);
+                }
             }
             setGameMode(player, itemManager);
-            event.setCancelled(true);
             return;
         }
 
@@ -102,16 +133,17 @@ public abstract class GameModes {
                 setPlayerMode(player, PlayerMode.PRACTICE_ENABLE);
             }
             setGameMode(player, itemManager);
-            event.setCancelled(true);
             return;
         }
 
         if (displayName.equals(Constantes.PRACTICE_ITEM_DISABLE.getText())) {
             if (currentMode == PlayerMode.PRACTICE_ENABLE) {
                 setPlayerMode(player, PlayerMode.PRACTICE_DISABLE);
+                if (hasEnteredJumpMode(player)) {
+                    setPlayerMode(player, PlayerMode.JUMP_MODE_ENABLE);
+                }
             }
             setGameMode(player, itemManager);
-            event.setCancelled(true);
         }
     }
 
@@ -124,20 +156,15 @@ public abstract class GameModes {
      * @param itemManager The item manager responsible for giving items to players.
      */
     public static void jumpMode(Player player, ItemManager itemManager) {
-        // Obtém o estado atual do jogador
         PlayerMode currentMode = getPlayerMode(player);
 
-        // Alterna o estado do modo Jump
         if (currentMode == PlayerMode.JUMP_MODE_ENABLE) {
-            // Desativa o modo Jump
             setPlayerMode(player, PlayerMode.JUMP_MODE_DISABLE);
         } else {
-            // Ativa o modo Jump
             removePlayer(player);
             setPlayerMode(player, PlayerMode.JUMP_MODE_ENABLE);
         }
 
-        // Aplica as alterações de estado ao jogador
         setGameMode(player, itemManager);
     }
 
@@ -156,21 +183,18 @@ public abstract class GameModes {
 
     public static void practiceMode(Player player, ItemManager itemManager) {
         PlayerMode currentMode = getPlayerMode(player);
-
         if (currentMode == PlayerMode.PRACTICE_ENABLE) {
             setPlayerMode(player, PlayerMode.PRACTICE_DISABLE);
         } else {
             removePlayer(player);
             setPlayerMode(player, PlayerMode.PRACTICE_ENABLE);
         }
-
         setGameMode(player, itemManager);
     }
 
     /**
      * Toggles the player's game mode and manages inventory and teleportation based on the player's current mode.
      * The player's mode is determined by the {@link PlayerMode} enumeration and affects their interaction with the game world.
-     *
      * Behavior:
      * - {@link PlayerMode#JUMP_MODE_ENABLE}:
      *   - Saves the player's current inventory and clears it.
@@ -183,13 +207,11 @@ public abstract class GameModes {
      *     - Sword
      *     - Hide item
      *   - Sends a message indicating that Jump Mode has been enabled.
-     *
      * - {@link PlayerMode#JUMP_MODE_DISABLE}:
      *   - Sets the player's game mode to Creative.
      *   - Teleports the player to their last saved checkpoint.
      *   - Clears the player's inventory and restores their previously saved inventory.
      *   - Sends a message indicating that Jump Mode has been disabled.
-     *
      * - {@link PlayerMode#SPECTATOR_ENABLE}:
      *   - Saves the player's current inventory and clears it.
      *   - Sets the player's game mode to Adventure.
@@ -203,7 +225,6 @@ public abstract class GameModes {
      *     - Player teleportation tool
      *     - Disable spectator mode item
      *   - Sends a message indicating that Spectator Mode has been enabled.
-     *
      * - {@link PlayerMode#SPECTATOR_DISABLE}:
      *   - Sets the player's game mode to Creative.
      *   - Teleports the player to their last saved checkpoint.
@@ -218,9 +239,14 @@ public abstract class GameModes {
         switch (getPlayerMode(player)) {
 
             case JUMP_MODE_ENABLE:
-                InventoryFactory.saveInventory(player);
+                if (InventoryFactory.checkInventory(player)) {
+                    InventoryFactory.saveInventory(player);
+                }
                 InventoryFactory.clearInventory(player);
-                CheckpointManager.setReturnCheckpoint(player, player.getLocation());
+                if (!hasEnteredJumpMode(player)) {
+                    markPlayerInJumpMode(player);
+                    CheckpointManager.setReturnCheckpoint(player, player.getLocation());
+                }
                 player.setGameMode(GameMode.ADVENTURE);
                 itemManager.giveItem(player, "checkpoint", 4);
                 itemManager.giveItem(player, "return-to-checkpoint", 2);
@@ -231,6 +257,7 @@ public abstract class GameModes {
                 break;
 
             case JUMP_MODE_DISABLE:
+                removePlayersInJumpMode(player);
                 player.setGameMode(GameMode.CREATIVE);
                 Location loc = CheckpointManager.getReturnCheckpoint(player);
                 player.teleport(loc);
@@ -240,9 +267,11 @@ public abstract class GameModes {
                 break;
 
             case SPECTATOR_ENABLE:
-                InventoryFactory.saveInventory(player);
+                if (InventoryFactory.checkInventory(player)) {
+                    InventoryFactory.saveInventory(player);
+                }
                 InventoryFactory.clearInventory(player);
-                CheckpointManager.setReturnCheckpoint(player, player.getLocation());
+                CheckpointManager.setPracticeCheckpoint(player, player.getLocation());
                 player.setGameMode(GameMode.ADVENTURE);
                 itemManager.giveItem(player, "checkpoint", 4);
                 itemManager.giveItem(player, "prac-checkpoint", 2);
@@ -256,17 +285,16 @@ public abstract class GameModes {
 
             case SPECTATOR_DISABLE:
                 player.setGameMode(GameMode.CREATIVE);
-                player.teleport(CheckpointManager.getReturnCheckpoint(player));
+                player.teleport(CheckpointManager.getPracticeCheckpoint(player));
                 InventoryFactory.clearInventory(player);
                 InventoryFactory.restoreInventory(player);
                 player.sendMessage(Constantes.SPECTATOR_MESSAGE_DISABLE.getText());
                 break;
 
             case PRACTICE_ENABLE:
-                //InventoryFactory.saveInventory(player);
-                InventoryFactory.clearInventory(player);
-                if (CheckpointManager.getReturnCheckpoint(player) != null) {
-                    player.teleport(CheckpointManager.getReturnCheckpoint(player));
+                //InventoryFactory.clearInventory(player);
+                if (CheckpointManager.getPracticeCheckpoint(player) != null) {
+                    player.teleport(CheckpointManager.getPracticeCheckpoint(player));
                 }
                 CheckpointManager.setReturnCheckpoint(player, player.getLocation());
                 player.setGameMode(GameMode.ADVENTURE);
@@ -281,15 +309,13 @@ public abstract class GameModes {
 
             case PRACTICE_DISABLE:
                 player.setGameMode(GameMode.CREATIVE);
-                player.teleport(CheckpointManager.getReturnCheckpoint(player));
+                player.teleport(CheckpointManager.getPracticeCheckpoint(player));
                 InventoryFactory.clearInventory(player);
                 InventoryFactory.restoreInventory(player);
                 player.sendMessage(Constantes.PRACTICE_MESSAGE_DISABLE.getText());
                 break;
 
             default:
-                player.setGameMode(GameMode.CREATIVE);
-                InventoryFactory.restoreInventory(player);
                 break;
         }
     }

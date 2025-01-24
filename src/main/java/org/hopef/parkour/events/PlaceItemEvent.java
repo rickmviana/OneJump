@@ -20,6 +20,9 @@ public class PlaceItemEvent implements Listener {
             if (item != null && item.getType() == Material.FISHING_ROD) {
                 event.setCancelled(true);
             }
+            if (item != null && item.getType() == Material.ENDER_PEARL) {
+                event.setCancelled(true);
+            }
         }
     }
 }

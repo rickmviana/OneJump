@@ -1,3 +1,20 @@
+/*
+ *     Copyright (C) 2025 rickmviana
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.hopef.parkour;
 
 import org.bukkit.*;
@@ -11,19 +28,16 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.hopef.parkour.command.*;
 import org.hopef.parkour.events.*;
 import org.hopef.parkour.manager.*;
 import org.hopef.parkour.manager.checkpoints.CheckpointManager;
-import org.hopef.parkour.types.GUIManager;
 import org.hopef.parkour.types.Menu;
-import org.hopef.parkour.utils.Constantes;
-import org.hopef.parkour.utils.JSONManager;
-import org.hopef.parkour.utils.WorldChecker;
+import org.hopef.parkour.types.YmlManager;
+import org.hopef.parkour.utils.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,61 +46,38 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 
+import static org.hopef.parkour.utils.Scoreboard.incrementJumpCount;
+import static org.hopef.parkour.utils.Scoreboard.setupScoreboard;
+
 /**
- * @author hopef
+ * @author   hopef
+ * @version  v1.0.2
  */
 public class OneJump extends JavaPlugin implements Listener {
+
 
     public static final Map<Location, Location> pressurePlateCheckpoints = new HashMap<>();
     public static final Map<UUID, Location> playerTemporaryCheckpoint = new HashMap<>();
     private final Set<Player> playersOnPlate = new HashSet<>();
     private File checkpointFile;
 
-    private CheckpointManager checkpointManager;
     private LobbyManager lobbyManager;
     private WorldChecker worldChecker;
     private Menu menu;
     private Player player;
+    private MapCommand mapCommand;
 
     @Override
     public void onEnable() {
-        getCommand("spc").setExecutor((sender, command, label, args) -> {
-            if (!(sender instanceof Player)) {
-                sender.sendMessage(Constantes.COMMAND_SENDER.getText());
-                return true;
-            }
-
-            Player player = (Player) sender;
-            if (!worldChecker.isInAllowedWorld(player)) {
-                player.sendMessage(Constantes.WORLD_ALLOWED.getText());
-                return true;
-            }
-
-            Location checkpoint = player.getLocation();
-
-            if (!playerTemporaryCheckpoint.containsKey(player.getUniqueId())) {
-                player.sendMessage(Constantes.PRESSURE_PLATE_INTERACT.getText());
-                return true;
-            }
-
-            Location plateLocation = playerTemporaryCheckpoint.get(player.getUniqueId());
-
-            // Atualiza ou adiciona o checkpoint associado à pressure plate
-            pressurePlateCheckpoints.put(plateLocation, checkpoint);
-
-            player.sendMessage("§r§8[§r§6§lM§r§e§lV§r§8] §r§7Successfully set §r§adesignated coords §r§7for the checkpoint.§r");
-            playerTemporaryCheckpoint.remove(player.getUniqueId());
-
-            return true;
-        });
-
         saveDefaultConfig();
 
         lobbyManager = new LobbyManager(getDataFolder());
-        checkpointManager = new CheckpointManager();
         worldChecker = new WorldChecker(getDataFolder());
         menu = new Menu(new ItemManager(getConfig()));
+        mapCommand = new MapCommand(worldChecker);
 
+
+        YmlManager.loadMaps();
         registerCommands();
         registerEvents();
         loadCheckpoints();
@@ -157,6 +148,20 @@ public class OneJump extends JavaPlugin implements Listener {
                 }
             }
         }
+
+        if (event.getFrom().getY() < event.getTo().getY() && player.isOnGround() && worldChecker.isInAllowedWorld(player)) {
+            incrementJumpCount(player); // Incrementa a contagem de pulos
+            setupScoreboard(player); // Atualiza o scoreboard
+        }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+
+        // Chama o método removeScoreboard para remover a scoreboard do jogador quando ele sair
+        Scoreboard scoreboard = new Scoreboard(this, getDataFolder()); // Certifique-se de instanciar a classe Scoreboard corretamente
+        scoreboard.removeScoreboard(player);
     }
 
     @EventHandler
@@ -229,6 +234,7 @@ public class OneJump extends JavaPlugin implements Listener {
             }
         }
     }
+
     private void loadCheckpoints() {
         checkpointFile = new File(getDataFolder(), "checkpoints.json");
         if (!checkpointFile.exists()) {
@@ -333,9 +339,10 @@ public class OneJump extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new BuildCommand(new ItemManager(getConfig()), worldChecker, getConfig()), this);
         Bukkit.getPluginManager().registerEvents(new PlaceItemEvent(), this);
         Bukkit.getPluginManager().registerEvents(new HungerControlListener(worldChecker), this);
-        Bukkit.getPluginManager().registerEvents(new PressurePlateListener(), this);
-        Bukkit.getPluginManager().registerEvents(new WorldChange(worldChecker), this);
+        Bukkit.getPluginManager().registerEvents(new WorldChange(this, worldChecker), this);
         Bukkit.getPluginManager().registerEvents(new ItemInteractionListener(), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new YmlManager(this), this);
     }
 
     private void registerCommands() {
@@ -346,10 +353,12 @@ public class OneJump extends JavaPlugin implements Listener {
         getCommand("psetlobby").setExecutor(new LobbyCommand(lobbyManager));
         getCommand("jump").setExecutor(new JumpCommand(itemManager, worldChecker));
         getCommand("pbuild").setExecutor(new BuildCommand(itemManager, worldChecker, getConfig()));
-        getCommand("setcoord").setExecutor(new SetCoordCommand());
-        getCommand("tpmap").setExecutor(new TpMapCommand(worldChecker));
         getCommand("spectator").setExecutor(new SpectatorCommand(itemManager, worldChecker));
         getCommand("practice").setExecutor(new PracticeCommand(itemManager, worldChecker));
+        getCommand("spc").setExecutor(new SPCCommand(worldChecker));
+        getCommand("setmap").setExecutor(new MapCommand(worldChecker));
+        getCommand("removemap").setExecutor(new MapCommand(worldChecker));
+        getCommand("sb").setExecutor(new SetBlockComand(this, worldChecker));
     }
 
     @EventHandler

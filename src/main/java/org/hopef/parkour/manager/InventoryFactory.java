@@ -1,6 +1,8 @@
 package org.hopef.parkour.manager;
 
+import org.bukkit.Utility;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventPriority;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -24,6 +26,17 @@ public class InventoryFactory {
 
         SavedInventory savedInventory = new SavedInventory(inventoryContents, armorContents);
         savedInventories.put(uuid, savedInventory);
+    }
+
+    /**
+     * Checks if the player has a saved inventory.
+     *
+     * @param player The player to check.
+     * @return True if the player has a saved inventory, false otherwise.
+     */
+    public static boolean checkInventory(Player player) {
+        UUID uuid = player.getUniqueId();
+        return !savedInventories.containsKey(uuid);
     }
 
     /**
@@ -59,6 +72,9 @@ public class InventoryFactory {
 
     public static void clearInventory(Player player) {
         player.getInventory().clear();
+        player.getInventory().setItemInHand(null);
+        player.getInventory().setContents(new ItemStack[player.getInventory().getSize()]);
+        player.updateInventory();
     }
 
     /**

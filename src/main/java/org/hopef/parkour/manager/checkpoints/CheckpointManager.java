@@ -11,9 +11,6 @@ public class CheckpointManager {
     private static final Map<String, Location> returnCheckpoint = new HashMap<>();
     private static final Map<String, Location> practiceCheckpoint = new HashMap<>();
 
-    public CheckpointManager() {
-    }
-
     /*
      *  For pressure plate and back to checkpoint
      */

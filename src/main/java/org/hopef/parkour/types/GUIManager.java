@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -13,6 +12,7 @@ import java.util.*;
 
 import static org.hopef.parkour.OneJump.playerTemporaryCheckpoint;
 import static org.hopef.parkour.OneJump.pressurePlateCheckpoints;
+import static org.hopef.parkour.types.YmlManager.maps;
 
 /**
  * The {@code GUIManager} class provides functionality to create and display dynamic
@@ -21,62 +21,7 @@ import static org.hopef.parkour.OneJump.pressurePlateCheckpoints;
  */
 public abstract class GUIManager {
 
-    private static final Map<UUID, Integer> playerPageMap = new HashMap<>();
-
-//    /**
-//     * Creates and displays a specific menu page for the player.
-//     *
-//     * @param player Player who will see the menu.
-//     * @param title Base title of the menu.
-//     * @param size Menu size (multiple of 9).
-//     * @param page Current page number.
-//     * @param glassSlots Slots that will receive decorative glass.
-//     * @param customItems List of items to be displayed paginated.
-//     * @param customGlassSlots a map of specific inventory slots to glass panel colors (key: slot, value: color)
-//     */
-//    public static void createMenuPage(Player player, String title, int size, int page,
-//                                      Set<Integer> glassSlots, Map<Integer, ItemStack> customItems,
-//                                      Map<Integer, Short> customGlassSlots) {
-//        if (size % 9 != 0 || size <= 0) {
-//            throw new IllegalArgumentException("Size must be a multiple of 9.");
-//        }
-//
-//        Inventory menu = Bukkit.createInventory(player, size, title + " - Page " + page);
-//
-//        // Preenche os slots com vidro decorativo
-//        fillWithGlass(menu, glassSlots, customGlassSlots);
-//
-//        // Adiciona itens personalizados do config.yml
-//        if (customItems != null) {
-//            for (Map.Entry<Integer, ItemStack> entry : customItems.entrySet()) {
-//                int slot = entry.getKey();
-//                ItemStack item = entry.getValue();
-//
-//                if (slot >= 0 && slot < size) {
-//                    menu.setItem(slot, item);
-//                }
-//            }
-//        }
-//
-//        // Calcula itens desta página e adiciona ao inventário
-//        int itemsPerPage = size - 9; // Slots disponíveis excluindo a linha de navegação
-//        int startIndex = (page - 1) * itemsPerPage;
-//        int endIndex = Math.min(startIndex + itemsPerPage, customItems.size());
-//
-//        List<ItemStack> itemsList = new ArrayList<>(customItems.values());
-//        for (int i = startIndex; i < endIndex; i++) {
-//            if (i < itemsList.size()) {
-//                menu.addItem(itemsList.get(i));
-//            }
-//        }
-//
-//        // Adiciona itens de navegação
-//        addNavigationItems(menu, page, customItems.size(), itemsPerPage);
-//
-//        // Abre o menu para o jogador e salva a página atual
-//        player.openInventory(menu);
-//        playerPageMap.put(player.getUniqueId(), page);
-//    }
+    public static final Map<Location, String> lorebook = new HashMap<>();
 
     /**
      * Displays a custom menu (GUI) to a player.
@@ -112,6 +57,36 @@ public abstract class GUIManager {
         player.openInventory(menu);
     }
 
+    public static void selectMapMenu(Player player, String title, int size, Set<Integer> glassSlots, Map<Integer, ItemStack> customItem, Map<Integer, Short> customGlassSlots) {
+        if (size % 9 != 0 || size <= 0) {
+            throw new IllegalArgumentException("Size defined must be a number that is a multiple of 9.");
+        }
+
+        Inventory menu = Bukkit.createInventory(player, size, title);
+
+        fillWithGlass(menu, glassSlots, customGlassSlots);
+
+        if (customItem != null) {
+            for (Map.Entry<Integer, ItemStack> entry : customItem.entrySet()) {
+                int slot = entry.getKey();
+                ItemStack item = entry.getValue();
+
+                if (slot >= 0 && slot < size) {
+                    menu.setItem(slot, item);
+                }
+            }
+        }
+
+        for (Map.Entry<String, Location> entry : maps.entrySet()) {
+            ItemStack item = new ItemStack(Material.MAP);
+            ItemMeta meta = item.getItemMeta();
+            meta.setDisplayName(entry.getKey());
+            item.setItemMeta(meta);
+            menu.addItem(item);
+        }
+        player.openInventory(menu);
+    }
+
     /**
      * Displays a custom menu (GUI) to a player.
      *
@@ -132,15 +107,25 @@ public abstract class GUIManager {
 
         fillWithGlass(menu, glassSlots, customGlassSlots);
 
-        ItemStack item = new ItemStack(Material.IRON_PLATE);
-        ItemMeta meta = item.getItemMeta();
+        ItemStack ironPlate = new ItemStack(Material.IRON_PLATE);
+        ItemMeta meta = ironPlate.getItemMeta();
         meta.setDisplayName("§bSet designated coordinates");
+        ItemStack book_quill = new ItemStack(Material.BOOK_AND_QUILL);
+        ItemMeta metas = book_quill.getItemMeta();
+        metas.setDisplayName("§aWrite strategy");
 
         Location loc = pressurePlateCheckpoints.get(plateLocatio);
         List<String> lore = getString(loc);
+
+        String stg = lorebook.get(plateLocatio);
+        List<String> lore2 = getString(stg);
+
         meta.setLore(lore);
-        item.setItemMeta(meta);
-        menu.setItem(13, item);
+        metas.setLore(lore2);
+        ironPlate.setItemMeta(meta);
+        book_quill.setItemMeta(metas);
+        menu.setItem(11, ironPlate);
+        menu.setItem(15, book_quill);
         player.openInventory(menu);
         playerTemporaryCheckpoint.put(player.getUniqueId(), plateLocatio);
     }
@@ -188,7 +173,7 @@ public abstract class GUIManager {
     private static List<String> getString(Location checkpointLocation) {
         List<String> lore = new ArrayList<>();
 
-        lore.add("§7---------------------");
+        lore.add("§7―――――――――――――――");
 
         if (checkpointLocation != null) {
             lore.add("§7x: " + checkpointLocation.getX());
@@ -202,67 +187,49 @@ public abstract class GUIManager {
         return lore;
     }
 
-    /**
-     * Adiciona itens de navegação (próxima página e página anterior) ao menu.
-     *
-     * @param menu          O inventário do menu.
-     * @param page          Número da página atual.
-     * @param totalItems    Número total de itens a serem exibidos.
-     * @param itemsPerPage  Número de itens por página.
-     */
-    private static void addNavigationItems(Inventory menu, int page, int totalItems, int itemsPerPage) {
-        int totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
+    private static List<String> getString(String lore) {
+        List<String> loreList = new ArrayList<>();
 
-        // Botão para página anterior
-        if (page > 1) {
-            ItemStack prevPage = new ItemStack(Material.ARROW);
-            ItemMeta prevMeta = prevPage.getItemMeta();
-            prevMeta.setDisplayName("§ePágina Anterior");
-            prevPage.setItemMeta(prevMeta);
-            menu.setItem(menu.getSize() - 9, prevPage); // Slot inferior esquerdo
+        loreList.add("§7――――――――――――――");
+
+        if (lore != null) {
+            loreList.add("§6Current Strategya");
+            loreList.add("§7» §e-");
+        } else {
+            loreList.add("§6Current Strategy");
+            loreList.add("§7» §e-");
         }
 
-        // Botão para próxima página
-        if (page < totalPages) {
-            ItemStack nextPage = new ItemStack(Material.ARROW);
-            ItemMeta nextMeta = nextPage.getItemMeta();
-            nextMeta.setDisplayName("§ePróxima Página");
-            nextPage.setItemMeta(nextMeta);
-            menu.setItem(menu.getSize() - 1, nextPage); // Slot inferior direito
-        }
+        return loreList;
     }
 
 //    /**
-//     * Handles menu clicks, managing navigation between pages.
+//     * Adiciona itens de navegação (próxima página e página anterior) ao menu.
 //     *
-//     * @param event Inventory click event.
-//     * @param titleBase Base of the menu title (without page number).
-//     * @param size Inventory size (multiple of 9).
-//     * @param items Complete list of items to be displayed paginated.
+//     * @param menu          O inventário do menu.
+//     * @param page          Número da página atual.
+//     * @param totalItems    Número total de itens a serem exibidos.
+//     * @param itemsPerPage  Número de itens por página.
 //     */
-//    public static void handleMenuClick(InventoryClickEvent event, String titleBase, int size, Map<Integer, ItemStack> items) {
-//        if (!(event.getWhoClicked() instanceof Player)) return;
+//    private static void addNavigationItems(Inventory menu, int page, int totalItems, int itemsPerPage) {
+//        int totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
 //
-//        Player player = (Player) event.getWhoClicked();
-//        UUID playerId = player.getUniqueId();
-//        Inventory inventory = event.getInventory();
+//        // Botão para página anterior
+//        if (page > 1) {
+//            ItemStack prevPage = new ItemStack(Material.ARROW);
+//            ItemMeta prevMeta = prevPage.getItemMeta();
+//            prevMeta.setDisplayName("§ePágina Anterior");
+//            prevPage.setItemMeta(prevMeta);
+//            menu.setItem(menu.getSize() - 9, prevPage); // Slot inferior esquerdo
+//        }
 //
-//        // Verifica se o menu é relevante
-//        if (!inventory.getTitle().startsWith(titleBase)) return;
-//
-//        event.setCancelled(true); // Impede interações normais
-//
-//        ItemStack clickedItem = event.getCurrentItem();
-//        if (clickedItem == null || clickedItem.getType() == Material.AIR) return;
-//
-//        String displayName = clickedItem.getItemMeta().getDisplayName();
-//        int currentPage = playerPageMap.getOrDefault(playerId, 1);
-//
-//        // Navegação entre páginas
-//        if ("§ePróxima Página".equals(displayName)) {
-//            createMenuPage(player, titleBase, size, currentPage + 1, null, items);
-//        } else if ("§ePágina Anterior".equals(displayName) && currentPage > 1) {
-//            createMenuPage(player, titleBase, size, currentPage - 1, null, items);
+//        // Botão para próxima página
+//        if (page < totalPages) {
+//            ItemStack nextPage = new ItemStack(Material.ARROW);
+//            ItemMeta nextMeta = nextPage.getItemMeta();
+//            nextMeta.setDisplayName("§ePróxima Página");
+//            nextPage.setItemMeta(nextMeta);
+//            menu.setItem(menu.getSize() - 1, nextPage); // Slot inferior direito
 //        }
 //    }
 

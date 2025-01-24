@@ -6,7 +6,7 @@
 
   <groupId>org.hopef</groupId>
   <artifactId>parkour</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <packaging>jar</packaging>
 
   <name>OneJump</name>
@@ -68,9 +68,26 @@
           <scope>provided</scope>
       </dependency>
       <dependency>
+          <groupId>org.spigotmc</groupId>
+          <artifactId>spigot</artifactId>
+          <version>1.8.8-R0.1-SNAPSHOT</version>
+          <scope>provided</scope>
+      </dependency>
+      <dependency>
           <groupId>org.json</groupId>
           <artifactId>json</artifactId>
           <version>20210307</version>
+      </dependency>
+      <dependency>
+          <groupId>org.skycraft</groupId>
+          <artifactId>scoreboards</artifactId>
+          <version>0.0.1</version>
+      </dependency>
+      <dependency>
+          <groupId>net.luckperms</groupId>
+          <artifactId>api</artifactId>
+          <version>5.4</version>
+          <scope>provided</scope>
       </dependency>
   </dependencies>
 </project>
